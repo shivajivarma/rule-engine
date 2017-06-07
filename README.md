@@ -1,5 +1,6 @@
 # Rule Engine
 
+```js
 engine.addRule({
 	conditions: {
 		any: [{
@@ -33,7 +34,7 @@ engine.addRule({
 		]
 	}
 });
-
+```
 
 ## Operators
 
