@@ -1,7 +1,7 @@
 # Rule Engine
 
 ```js
-engine.addRule({
+var rule = new Rule({
 	conditions: {
 		any: [{
 				all: [{
@@ -34,6 +34,18 @@ engine.addRule({
 		]
 	}
 });
+
+rule.run({
+	student: xyzStudent,
+	user: xyzUser
+}).success(function(){
+	//
+}).fail(function(){
+
+});
+
+
+
 ```
 
 ## Operators
