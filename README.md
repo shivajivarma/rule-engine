@@ -50,6 +50,14 @@ The ```operator``` compares the value returned by the ```fact``` to what is stor
 
   _these operators use strict equality (===) and inequality (!==)_
 
+### String operators:
+
+  ```startsWith``` - _fact_ must start with _value_
+  
+  ```endsWith``` - _fact_ must ends with _value_
+  
+  ```contains``` - _fact_ must contain _value_
+
 ### Numeric operators:
 
   ```lessThan``` - _fact_ must be less than _value_
