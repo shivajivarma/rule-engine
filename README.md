@@ -39,9 +39,9 @@ rule.run({
 	student: xyzStudent,
 	user: xyzUser
 }).success(function(){
-	//
+	// do something
 }).fail(function(){
-
+	// do something else
 });
 
 
