@@ -57,6 +57,8 @@ The ```operator``` compares the value returned by the ```fact``` to what is stor
   ```endsWith``` - _fact_ must ends with _value_
   
   ```contains``` - _fact_ must contain _value_
+  
+  ```match``` - _fact_ must match _value_ (regex)
 
 ### Numeric operators:
 
