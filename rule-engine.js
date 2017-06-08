@@ -28,37 +28,37 @@ Rule.prototype.run = function(facts){
 };
 
 Rule.execExpression = function(expression, facts){
-  var lhs = deepFind(facts, expression.variable); 
-  var rhs = expression.value;
+  var lhsValue = typeof expression.lhs === 'object' ? deepFind(facts, expression.lhs[0]) : expression.lhs; 
+  var rhsValue = typeof expression.rhs === 'object' ? deepFind(facts, expression.rhs[0]) : expression.rhs; 
   
   switch(expression.operator){
     case 'equal':
-      if(lhs === rhs){
+      if(lhsValue === rhsValue){
          return true;
       }
       break;
     case 'notEqual':
-      if(lhs !== rhs){
+      if(lhsValue !== rhsValue){
          return true;
       }
       break;
     case 'lessThan':
-      if(typeof lhs === 'number' && typeof rhs === 'number' && lhs < rhs){
+      if(typeof lhsValue === 'number' && typeof rhsValue === 'number' && lhsValue < rhsValue){
          return true;
       }
       break;
     case 'lessThanInclusive':
-      if(typeof lhs === 'number' && typeof rhs === 'number' && lhs <= rhs){
+      if(typeof lhsValue === 'number' && typeof rhsValue === 'number' && lhsValue <= rhsValue){
          return true;
       }
       break;
    case 'greaterThan':
-      if(typeof lhs === 'number' && typeof rhs === 'number' && lhs < rhs){
+      if(typeof lhsValue === 'number' && typeof rhsValue === 'number' && lhsValue > rhsValue){
          return true;
       }
       break;
     case 'greaterThanInclusive':
-      if(typeof lhs === 'number' && typeof rhs === 'number' && lhs <= rhs){
+      if(typeof lhsValue === 'number' && typeof rhsValue === 'number' && lhsValue >= rhsValue){
          return true;
       }
       break;
@@ -101,9 +101,9 @@ r = new Rule({
 	conditions: {
 		any: [{
 				all: [{
-						variable: 'student.age',
+						lhs: ['student.age'],
 						operator: 'lessThan',
-						value: 40
+                        rhs: 40
 					}
 				]
 			}
@@ -113,6 +113,6 @@ r = new Rule({
 
 console.log(r.run({
   student : {
-    age: '4'
+    age: 4
   }
 }));
