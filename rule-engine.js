@@ -4,6 +4,20 @@ function Rule(options){
   
 }
 
+function deepFind(obj, path) {
+  var paths = path.split('.'), 
+      current = obj, i;
+
+  for (i = 0; i < paths.length; ++i) {
+    if (current[paths[i]] === undefined) {
+      return undefined;
+    } else {
+      current = current[paths[i]];
+    }
+  }
+  return current;
+}
+
 Rule.prototype.run = function(facts){
     for(var key in this.conditions){
       if (this.conditions.hasOwnProperty(key)) {
@@ -11,16 +25,47 @@ Rule.prototype.run = function(facts){
       }
     }
   
-}
+};
 
 Rule.execExpression = function(expression, facts){
-  var variable = expression.variable.split('.');
-  var lhs = facts[variable[0]][variable[1]];  
-  if(lhs === expression.value){
-     return true;
+  var lhs = deepFind(facts, expression.variable); 
+  var rhs = expression.value;
+  
+  switch(expression.operator){
+    case 'equal':
+      if(lhs === rhs){
+         return true;
+      }
+      break;
+    case 'notEqual':
+      if(lhs !== rhs){
+         return true;
+      }
+      break;
+    case 'lessThan':
+      if(typeof lhs === 'number' && typeof rhs === 'number' && lhs < rhs){
+         return true;
+      }
+      break;
+    case 'lessThanInclusive':
+      if(typeof lhs === 'number' && typeof rhs === 'number' && lhs <= rhs){
+         return true;
+      }
+      break;
+   case 'greaterThan':
+      if(typeof lhs === 'number' && typeof rhs === 'number' && lhs < rhs){
+         return true;
+      }
+      break;
+    case 'greaterThanInclusive':
+      if(typeof lhs === 'number' && typeof rhs === 'number' && lhs <= rhs){
+         return true;
+      }
+      break;
   }
   
-}
+  
+};
 
 Rule.execCondition = function(condition, facts){
   if(condition.hasOwnProperty('any')){
@@ -30,7 +75,7 @@ Rule.execCondition = function(condition, facts){
   } else if(condition.hasOwnProperty('operator')) {
       return Rule.execExpression(condition, facts);
   }
-}
+};
 
 Rule.execConditions = function(operator, conditions, facts){
     var result, condition;
@@ -49,7 +94,7 @@ Rule.execConditions = function(operator, conditions, facts){
       }
       return true;
     }
-}
+};
 
 
 r = new Rule({
@@ -57,7 +102,7 @@ r = new Rule({
 		any: [{
 				all: [{
 						variable: 'student.age',
-						operator: 'equal',
+						operator: 'lessThan',
 						value: 40
 					}
 				]
@@ -68,6 +113,6 @@ r = new Rule({
 
 console.log(r.run({
   student : {
-    age: 40
+    age: '4'
   }
 }));
