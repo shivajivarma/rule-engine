@@ -5,13 +5,13 @@ var rule = new Rule({
 	conditions: {
 		any: [{
 				all: [{
-						variable: 'student.age',
+						lhs: ['student.age'],
 						operator: 'equal',
-						value: 40
+						rhs: 40
 					}, {
-						variable: 'student.name',
-						operator: 'greaterThanInclusive',
-						variable: 'user.fullname'
+						lhs: ['student.name'],
+						operator: 'equal',
+						rhs: ['user.fullname']
 					}
 				]
 			}, {
@@ -19,13 +19,13 @@ var rule = new Rule({
 					array: 'student.subjects',
 					as: 'subject'
 					all: [{
-							variable: 'subject.mark',
+							lhs: ['subject.mark'],
 							operator: 'equal',
-							value: 48
+							rhs: 48
 						}, {
-							variable: 'subject.name',
+							lhs: ['subject.name'],
 							operator: 'greaterThanInclusive',
-							value: 'maths'
+							rhs: 'maths'
 						}
 					]
 				}
