@@ -58,28 +58,46 @@
 
 	}
 
-	function execCondition(condition, facts) {
-		if (condition.hasOwnProperty('any')) {
-			return execConditions('any', condition.any, facts);
-		} else if (condition.hasOwnProperty('all')) {
-			return execConditions('all', condition.all, facts);
-		} else if (condition.hasOwnProperty('operator')) {
-			return execExpression(condition, facts);
+	function execCondition(subject, facts) {
+
+		if (subject.hasOwnProperty('any')) {
+			return execConditions('any', subject.any, facts);
+		} else if (subject.hasOwnProperty('all')) {
+			return execConditions('all', subject.all, facts);
+		} else if (subject.hasOwnProperty('forEach')) {
+            
+            var subFacts = deepFind(facts, subject.forEach.array);
+            if(subFacts){
+              for (var k = 0; k < subFacts.length; k++) {
+                var subFact = {};
+                    subFact[subject.forEach.as] = subFacts[k];
+                if (subject.forEach.hasOwnProperty('all')) {
+					return execConditions('all', subject.forEach['all'], subFact);
+				} else {
+                    return execConditions('any', subject.forEach['any'], subFact);
+				}
+              }
+            }
+          
+            return false;
+		} else if (subject.hasOwnProperty('operator')) {
+			return execExpression(subject, facts);
 		}
 	}
 
 	function execConditions(operator, conditions, facts) {
 		var result,
-		condition;
+            length = conditions.length;
+     
 		if (operator === 'any') {
-			for (var i = 0; i < conditions.length; i++) {
+			for (var i = 0; i < length; i++) {
 				if (execCondition(conditions[i], facts)) {
 					return true;
 				}
 			}
 			return false;
 		} else if (operator === 'all') {
-			for (var j = 0; j < conditions.length; j++) {
+			for (var j = 0; j < length; j++) {
 				if (!execCondition(conditions[j], facts)) {
 					return false;
 				}
@@ -91,6 +109,7 @@
 	Rule.prototype = {
 		run : function (facts) {
 			for (var key in this.conditions) {
+              
 				if (this.conditions.hasOwnProperty(key)) {
 					return execConditions(key, this.conditions[key], facts);
 				}
