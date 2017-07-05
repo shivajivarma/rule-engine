@@ -1,122 +1,137 @@
-(function (global) {
+class Rule {
+    constructor(options) {
+        this.conditions = options.conditions;
+    }
 
-	function Rule(options) {
-		this.conditions = options.conditions;
-	}
+    static deepFind(obj, path) {
+        let paths = path.split('.'),
+            current = obj,
+            i;
 
-	function deepFind(obj, path) {
-		var paths = path.split('.'),
-		current = obj,
-		i;
-
-		for (i = 0; i < paths.length; ++i) {
-			if (current[paths[i]] === undefined) {
-				return undefined;
-			} else {
-				current = current[paths[i]];
-			}
-		}
-		return current;
-	}
-
-	function execExpression(expression, facts) {
-		var lhsValue = typeof expression.lhs === 'object' ? deepFind(facts, expression.lhs[0]) : expression.lhs;
-		var rhsValue = typeof expression.rhs === 'object' ? deepFind(facts, expression.rhs[0]) : expression.rhs;
-
-		switch (expression.operator) {
-		case 'equal':
-			if (lhsValue === rhsValue) {
-				return true;
-			}
-			break;
-		case 'notEqual':
-			if (lhsValue !== rhsValue) {
-				return true;
-			}
-			break;
-		case 'lessThan':
-			if (typeof lhsValue === 'number' && typeof rhsValue === 'number' && lhsValue < rhsValue) {
-				return true;
-			}
-			break;
-		case 'lessThanInclusive':
-			if (typeof lhsValue === 'number' && typeof rhsValue === 'number' && lhsValue <= rhsValue) {
-				return true;
-			}
-			break;
-		case 'greaterThan':
-			if (typeof lhsValue === 'number' && typeof rhsValue === 'number' && lhsValue > rhsValue) {
-				return true;
-			}
-			break;
-		case 'greaterThanInclusive':
-			if (typeof lhsValue === 'number' && typeof rhsValue === 'number' && lhsValue >= rhsValue) {
-				return true;
-			}
-			break;
-		}
-
-	}
-
-	function execCondition(subject, facts) {
-
-		if (subject.hasOwnProperty('any')) {
-			return execConditions('any', subject.any, facts);
-		} else if (subject.hasOwnProperty('all')) {
-			return execConditions('all', subject.all, facts);
-		} else if (subject.hasOwnProperty('forEach')) {
-            
-            var subFacts = deepFind(facts, subject.forEach.array);
-            if(subFacts){
-              for (var k = 0; k < subFacts.length; k++) {
-                var subFact = {};
-                    subFact[subject.forEach.as] = subFacts[k];
-                if (subject.forEach.hasOwnProperty('all')) {
-					return execConditions('all', subject.forEach['all'], subFact);
-				} else {
-                    return execConditions('any', subject.forEach['any'], subFact);
-				}
-              }
+        for (i = 0; i < paths.length; ++i) {
+            if (current[paths[i]] === undefined) {
+                return undefined;
+            } else {
+                current = current[paths[i]];
             }
-          
+        }
+        return current;
+    }
+
+    static execExpression(expression, facts) {
+        let lhsValue = typeof expression.lhs === 'object' ? Rule.deepFind(facts, expression.lhs[0]) : expression.lhs;
+        let rhsValue = typeof expression.rhs === 'object' ? Rule.deepFind(facts, expression.rhs[0]) : expression.rhs;
+
+        switch (expression.operator) {
+            case 'equal':
+                if (lhsValue === rhsValue) {
+                    return true;
+                }
+                break;
+            case 'notEqual':
+                if (lhsValue !== rhsValue) {
+                    return true;
+                }
+                break;
+            case 'lessThan':
+                if (typeof lhsValue === 'number' && typeof rhsValue === 'number' && lhsValue < rhsValue) {
+                    return true;
+                }
+                break;
+            case 'lessThanInclusive':
+                if (typeof lhsValue === 'number' && typeof rhsValue === 'number' && lhsValue <= rhsValue) {
+                    return true;
+                }
+                break;
+            case 'greaterThan':
+                if (typeof lhsValue === 'number' && typeof rhsValue === 'number' && lhsValue > rhsValue) {
+                    return true;
+                }
+                break;
+            case 'greaterThanInclusive':
+                if (typeof lhsValue === 'number' && typeof rhsValue === 'number' && lhsValue >= rhsValue) {
+                    return true;
+                }
+                break;
+        }
+
+    }
+
+    static execCondition(subject, facts) {
+
+        if (subject.hasOwnProperty('any')) {
+            return Rule.execConditions('any', subject.any, facts);
+        } else if (subject.hasOwnProperty('all')) {
+            return Rule.execConditions('all', subject.all, facts);
+        } else if (subject.hasOwnProperty('forEach')) {
+
+            let subFacts = deepFind(facts, subject.forEach.array);
+            if (subFacts) {
+                for (let k = 0; k < subFacts.length; k++) {
+                    let subFact = {};
+                    subFact[subject.forEach.as] = subFacts[k];
+                    if (subject.forEach.hasOwnProperty('all')) {
+                        return Rule.execConditions('all', subject.forEach['all'], subFact);
+                    } else {
+                        return Rule.execConditions('any', subject.forEach['any'], subFact);
+                    }
+                }
+            }
+
             return false;
-		} else if (subject.hasOwnProperty('operator')) {
-			return execExpression(subject, facts);
-		}
-	}
+        } else if (subject.hasOwnProperty('operator')) {
+            return Rule.execExpression(subject, facts);
+        }
+    }
 
-	function execConditions(operator, conditions, facts) {
-		var result,
+    static execConditions(operator, conditions, facts) {
+        let result,
             length = conditions.length;
-     
-		if (operator === 'any') {
-			for (var i = 0; i < length; i++) {
-				if (execCondition(conditions[i], facts)) {
-					return true;
-				}
-			}
-			return false;
-		} else if (operator === 'all') {
-			for (var j = 0; j < length; j++) {
-				if (!execCondition(conditions[j], facts)) {
-					return false;
-				}
-			}
-			return true;
-		}
-	}
 
-	Rule.prototype = {
-		run : function (facts) {
-			for (var key in this.conditions) {
-              
-				if (this.conditions.hasOwnProperty(key)) {
-					return execConditions(key, this.conditions[key], facts);
-				}
-			}
-		}
-	};
+        if (operator === 'any') {
+            for (let i = 0; i < length; i++) {
+                if (Rule.execCondition(conditions[i], facts)) {
+                    return true;
+                }
+            }
+            return false;
+        } else if (operator === 'all') {
+            for (let j = 0; j < length; j++) {
+                if (!Rule.execCondition(conditions[j], facts)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
 
-	global.Rule = Rule;
+    run(facts) {
+        for (let key in this.conditions) {
+            if (this.conditions.hasOwnProperty(key)) {
+                return Rule.execConditions(key, this.conditions[key], facts);
+            }
+        }
+    }
 
-})(this);
+}
+
+
+let r = new Rule({
+    conditions: {
+        any: [{
+            all: [{
+                lhs: ['student.age'],
+                operator: 'lessThan',
+                rhs: 40
+            }
+            ]
+        }
+        ]
+    }
+});
+
+console.log(r.run({
+    student: {
+        age: 30
+    }
+}));
