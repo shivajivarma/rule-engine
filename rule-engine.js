@@ -65,17 +65,17 @@ class Rule {
             return Rule.execConditions('all', subject.all, facts);
         } else if (subject.hasOwnProperty('forEach')) {
 
-            let subFacts = deepFind(facts, subject.forEach.array);
+            let subFacts = Rule.deepFind(facts, subject.forEach['array']);
             if (subFacts) {
-                for (let k = 0; k < subFacts.length; k++) {
+                subFacts.forEach(function (fact) {
                     let subFact = {};
-                    subFact[subject.forEach.as] = subFacts[k];
+                    subFact[subject.forEach['as']] = fact;
                     if (subject.forEach.hasOwnProperty('all')) {
                         return Rule.execConditions('all', subject.forEach['all'], subFact);
                     } else {
                         return Rule.execConditions('any', subject.forEach['any'], subFact);
                     }
-                }
+                });
             }
 
             return false;
@@ -85,8 +85,7 @@ class Rule {
     }
 
     static execConditions(operator, conditions, facts) {
-        let result,
-            length = conditions.length;
+        let length = conditions.length;
 
         if (operator === 'any') {
             for (let i = 0; i < length; i++) {
